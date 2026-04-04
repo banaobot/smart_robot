@@ -28,7 +28,6 @@ class UltrasonicSensorNode(Node):
 
         self.get_logger().info(f"Publishing Distance: {msg.data} m")
 
-
 def main(args=None):
     rclpy.init(args=args)
     node = UltrasonicSensorNode()

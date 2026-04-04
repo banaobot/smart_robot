@@ -24,7 +24,8 @@ setup(
     },
     entry_points={
         'console_scripts': [
-          'ultrasonic_node = smart_robot.ultrasonic_sensor_node:main',
+            'ultrasonic_node = smart_robot.ultrasonic_sensor_node:main',
+            'motor_node = smart_robot.motor_node:main',
         ],
     },
 )
