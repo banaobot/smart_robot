@@ -7,6 +7,9 @@ class DecisionNode(Node):
 
   def __init__(self):
     super().__init__('decision_node')
+
+    self.declare_parameter('distance_threshold', 1.0)
+    
     # Subscribe to sensor
     self.subscription = self.create_subscription(Float32, '/distance', self.distance_callback, 10)
 
@@ -16,8 +19,11 @@ class DecisionNode(Node):
 
   def distance_callback(self, msg):
     distance = msg.data
+
+    distance_threshold = self.get_parameter('distance_threshold').value
+
     cmd = String()
-    if distance < 1.0:
+    if distance < distance_threshold:
       cmd.data = "STOP"
     else:
       cmd.data = "MOVE_FORWARD"
