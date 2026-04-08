@@ -31,6 +31,8 @@ setup(
             'motor_decision_node = smart_robot.motor_decision_node:main',
             'motor_node = smart_robot.motor_node:main',
             'decision_node = smart_robot.decision_node:main',
+            'control_node = smart_robot.control_node:main',
+
         ],
     },
 )

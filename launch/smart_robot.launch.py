@@ -38,9 +38,16 @@ def generate_launch_description():
         name='motor_node'
     )
 
+    control_node = Node(
+        package='smart_robot',
+        executable='control_node',
+        name='control_node'
+    )
+
     return LaunchDescription([
         threshold_arg,
         ultrasonic_node,
         decision_node,
-        motor_node
+        motor_node,
+        control_node
     ])
