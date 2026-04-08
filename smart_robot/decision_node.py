@@ -10,6 +10,10 @@ class DecisionNode(Node):
 
     self.declare_parameter('distance_threshold', 1.0)
     
+    # Publish command
+    self.publisher_ = self.create_publisher(String, '/cmd_vel', 10)
+    self.get_logger().info("Decision Node Started")
+
     # Subscribe to sensor
     self.subscription = self.create_subscription(Float32, '/distance', self.distance_callback, 10)
 
@@ -19,9 +23,26 @@ class DecisionNode(Node):
     # Subscribe to robot state
     self.state_sub = self.create_subscription(String, '/robot_state', self.state_callback, 10)
 
-    # Publish command
-    self.publisher_ = self.create_publisher(String, '/cmd_vel', 10)
-    self.get_logger().info("Decision Node Started")
+  def distance_callback(self, msg):
+
+    # FIRST: check robot state
+    if not self.robot_active:
+        self.get_logger().info("Robot Stopped/Inactive : Ignoring sensor data")
+        return
+
+    distance = msg.data
+    distance_threshold = self.get_parameter('distance_threshold').value
+
+    cmd = String()
+
+    if distance < distance_threshold:
+        cmd.data = "STOP"
+    else:
+        cmd.data = "MOVE_FORWARD"
+
+    self.publisher_.publish(cmd)
+
+    self.get_logger().info(f"[Decision] Distance: {distance} -> {cmd.data}")
 
   def state_callback(self, msg):
     if msg.data == "START":
@@ -30,20 +51,6 @@ class DecisionNode(Node):
       self.robot_active = False
 
     self.get_logger().info(f"Robot State Updated: {msg.data}")
-
-  def distance_callback(self, msg):
-    distance = msg.data
-
-    distance_threshold = self.get_parameter('distance_threshold').value
-
-    cmd = String()
-    if distance < distance_threshold:
-      cmd.data = "STOP"
-    else:
-      cmd.data = "MOVE_FORWARD"
-    
-    self.publisher_.publish(cmd)
-    self.get_logger().info(f"[Decision] Distance: {distance} -> {cmd.data}")
 
 def main(args=None):
 	rclpy.init(args=args)
