@@ -4,21 +4,44 @@ from std_msgs.msg import String
 
 
 class MotorNode(Node):
-    
+
 	def __init__(self):
 		super().__init__('motor_node')
 
-		self.subscription = self.create_subscription(String, '/cmd_vel', self.command_callback, 10)
-		self.get_logger().info("Motor Node Started")
-                
-	def command_callback(self, msg):
-		command = msg.data
-		# self.get_logger().info(f"Command: {command}")
-		
-		# Simulated motor execution
-		if command == "STOP":
+		# Internal state
+		self.current_command = "STOP"
+		self.robot_active = True
+
+		# Subscribe to command
+		self.cmd_sub = self.create_subscription(String, '/cmd_vel', self.cmd_callback, 10)
+
+		# Subscribe to robot state
+		self.state_sub = self.create_subscription(String, '/robot_state', self.state_callback, 10)
+
+		self.get_logger().info("Motor Node Started (State-Aware)")
+
+	def cmd_callback(self, msg):
+		self.current_command = msg.data
+		self.execute()
+
+	def state_callback(self, msg):
+		if msg.data == "START":
+			self.robot_active = True
+		elif msg.data == "STOP":
+			self.robot_active = False
+
+		self.execute()
+
+	def execute(self):
+
+		# Final decision logic
+		if not self.robot_active:
+			self.get_logger().info("Motor: STOPPED (Robot Disabled)")
+			return
+
+		if self.current_command == "STOP":
 			self.get_logger().info("Motor: STOPPED")
-		elif command == "MOVE_FORWARD":
+		elif self.current_command == "MOVE_FORWARD":
 			self.get_logger().info("Motor: MOVING FORWARD")
 
 def main(args=None):
