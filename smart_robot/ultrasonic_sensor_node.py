@@ -15,7 +15,7 @@ class UltrasonicSensorNode(Node):
         # Timer to simulate continuous sensor reading
         self.timer = self.create_timer(1.0, self.publish_distance)
 
-        self.get_logger().info("Fake Sensor Node Started")
+        self.get_logger().info("Ultrasonic Sensor Node Started")
 
 
     def publish_distance(self):
@@ -26,7 +26,7 @@ class UltrasonicSensorNode(Node):
 
         self.publisher_.publish(msg)
 
-        self.get_logger().info(f"Publishing Distance: {msg.data} m")
+        # self.get_logger().info(f"Publishing Distance: {msg.data} m")
 
 def main(args=None):
     rclpy.init(args=args)

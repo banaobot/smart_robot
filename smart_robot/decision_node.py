@@ -27,7 +27,7 @@ class DecisionNode(Node):
 
     # FIRST: check robot state
     if not self.robot_active:
-        self.get_logger().info("Robot Stopped/Inactive : Ignoring sensor data")
+        self.get_logger().info("Robot Inactive : Ignoring sensor data")
         return
 
     distance = msg.data

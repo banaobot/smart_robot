@@ -18,10 +18,12 @@ class MotorNode(Node):
 		# Subscribe to robot state
 		self.state_sub = self.create_subscription(String, '/robot_state', self.state_callback, 10)
 
-		self.get_logger().info("Motor Node Started (State-Aware)")
+		self.get_logger().info("Motor Node Started")
 
 	def cmd_callback(self, msg):
 		self.current_command = msg.data
+		self.get_logger().info("Received Command: " + self.current_command)
+
 		self.execute()
 
 	def state_callback(self, msg):
