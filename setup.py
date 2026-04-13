@@ -13,7 +13,6 @@ setup(
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
         (os.path.join('share', package_name, 'launch'), glob('launch/*.launch.py')),
-        (os.path.join('share', package_name, 'action'), glob('action/*.action')),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -34,6 +33,7 @@ setup(
             'decision_node = smart_robot.decision_node:main',
             'control_node = smart_robot.control_node:main',
             'control_client_node = smart_robot.control_client_node:main',
+            'navigation_node = smart_robot.navigation_node:main',
         ],
     },
 )

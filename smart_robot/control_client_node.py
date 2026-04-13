@@ -12,11 +12,13 @@ class ControlClientNode(Node):
 
     # Create client
     self.client = self.create_client(SetBool, 'robot_control')
+
     # Wait for service
     while not self.client.wait_for_service(timeout_sec=1.0):
       self.get_logger().info('Waiting for service...')
 
     self.get_logger().info("Control Client Node Started")
+
     self.send_requests()
 
   def send_requests(self):
@@ -36,10 +38,14 @@ class ControlClientNode(Node):
 
       request = SetBool.Request()
       request.data = True if user_input == "start" else False
+
       future = self.client.call_async(request)
+
       # Wait for response
       rclpy.spin_until_future_complete(self, future)
+
       response = future.result()
+
       self.get_logger().info(f"Response: {response.message}")
 
 def main(args=None):
