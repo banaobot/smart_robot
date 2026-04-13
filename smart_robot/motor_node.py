@@ -10,7 +10,7 @@ class MotorNode(Node):
 
 		# Internal state
 		self.current_command = "STOP"
-		self.robot_active = True
+		self.robot_active = False
 
 		# Subscribe to command
 		self.cmd_sub = self.create_subscription(String, '/cmd_vel', self.cmd_callback, 10)
@@ -22,7 +22,7 @@ class MotorNode(Node):
 
 	def cmd_callback(self, msg):
 		self.current_command = msg.data
-		self.get_logger().info("Received Command: " + self.current_command)
+		self.get_logger().info("Command Callback: " + self.current_command)
 
 		self.execute()
 
@@ -38,7 +38,7 @@ class MotorNode(Node):
 
 		# Final decision logic
 		if not self.robot_active:
-			self.get_logger().info("Motor: STOPPED (Robot Disabled)")
+			self.get_logger().info("Robot Disabled)")
 			return
 
 		if self.current_command == "STOP":

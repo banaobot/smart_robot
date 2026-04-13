@@ -32,7 +32,7 @@ setup(
             'motor_node = smart_robot.motor_node:main',
             'decision_node = smart_robot.decision_node:main',
             'control_node = smart_robot.control_node:main',
-
+            'control_client_node = smart_robot.control_client_node:main',
         ],
     },
 )
