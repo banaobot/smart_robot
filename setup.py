@@ -34,6 +34,7 @@ setup(
             'control_node = smart_robot.control_node:main',
             'control_client_node = smart_robot.control_client_node:main',
             'navigation_node = smart_robot.navigation_node:main',
+            'navigation_client_node = smart_robot.navigation_client_node:main',
         ],
     },
 )
