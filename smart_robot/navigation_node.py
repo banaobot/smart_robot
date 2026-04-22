@@ -1,6 +1,8 @@
 import rclpy
 from rclpy.node import Node
-from rclpy.action import ActionServer
+from rclpy.action import ActionServer, CancelResponse
+
+from rclpy.executors import MultiThreadedExecutor
 
 from smart_robot_interfaces.action import MoveRobot
 import time
@@ -10,8 +12,13 @@ class NavigationNode(Node):
   def __init__(self):
     super().__init__('navigation_node')
 
-    self._action_server = ActionServer(self, MoveRobot, 'move_robot', self.execute_callback)
+    self._action_server = ActionServer(self, MoveRobot, 'move_robot',execute_callback=self.execute_callback, cancel_callback=self.cancel_callback)
+    
     self.get_logger().info("Action Server Started")
+
+  def cancel_callback(self, goal_handle):
+    self.get_logger().info(f"Received cancel request: {goal_handle.request.duration}")
+    return CancelResponse.ACCEPT
 
   def execute_callback(self, goal_handle):
 
@@ -33,6 +40,15 @@ class NavigationNode(Node):
     start_time = time.time()
     
     while time.time() - start_time < duration:
+
+      # Check if cancel requested
+      if goal_handle.is_cancel_requested:
+        goal_handle.canceled()
+        self.get_logger().info("Goal canceled")
+        
+        result = MoveRobot.Result()
+        result.success = False
+        return result
       
       feedback_msg.time_elapsed = time.time() - start_time
       goal_handle.publish_feedback(feedback_msg)
@@ -51,7 +67,10 @@ def main(args=None):
   rclpy.init(args=args)
   node = NavigationNode()
   try:
-    rclpy.spin(node)
+    executor = MultiThreadedExecutor()
+    executor.add_node(node)
+    executor.spin()
+    
   except KeyboardInterrupt:
     pass
   finally:

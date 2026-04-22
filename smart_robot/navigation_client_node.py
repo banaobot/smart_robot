@@ -12,7 +12,7 @@ class MoveRobotActionClient(Node):
     
   def send_goal(self):
     goal_msg = MoveRobot.Goal()
-    goal_msg.duration = 10.0 # Duration in seconds
+    goal_msg.duration = 5.0 # Duration in seconds
 
     self.get_logger().info("Sending goal...")
     self._client.wait_for_server()
@@ -31,7 +31,9 @@ class MoveRobotActionClient(Node):
 
     self._get_result_future = self.client_goal_handle.get_result_async()
     self._get_result_future.add_done_callback(self.result_callback)
-
+    
+    self._cancel_timer = self.create_timer(2.0, self.cancel_goal)
+    
   def result_callback(self, future):
     result = future.result().result
     self.get_logger().info(f"Final Result: {result.success}")
@@ -39,6 +41,25 @@ class MoveRobotActionClient(Node):
   def feedback_callback(self, feedback_msg):
     feedback = feedback_msg.feedback
     self.get_logger().info(f"Feedback: {feedback.time_elapsed:.2f} sec")
+
+  def cancel_goal(self):
+    if self.client_goal_handle is None:
+      self.get_logger().info("No active goal to cancel")
+      return
+    self.get_logger().info("Sending cancel request...")
+
+    cancel_future = self.client_goal_handle.cancel_goal_async()
+    cancel_future.add_done_callback(self.cancel_done_callback)
+		
+  	# Stop further cancel attempts
+    self._cancel_timer.cancel()
+    
+  def cancel_done_callback(self, future):
+    cancel_response = future.result()
+    if len(cancel_response.goals_canceling) > 0:
+      self.get_logger().info("Cancel accepted")
+    else:
+      self.get_logger().info("Cancel rejected")
           
 def main(args=None):
 	rclpy.init(args=args)
