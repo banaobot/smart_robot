@@ -1,6 +1,6 @@
 import rclpy
 from rclpy.node import Node
-from rclpy.action import ActionServer, CancelResponse
+from rclpy.action import ActionServer, CancelResponse, GoalResponse
 
 from rclpy.executors import MultiThreadedExecutor
 
@@ -12,9 +12,18 @@ class NavigationNode(Node):
   def __init__(self):
     super().__init__('navigation_node')
 
-    self._action_server = ActionServer(self, MoveRobot, 'move_robot',execute_callback=self.execute_callback, cancel_callback=self.cancel_callback)
+    self._action_server = ActionServer(self, MoveRobot, 'move_robot',execute_callback=self.execute_callback, cancel_callback=self.cancel_callback, goal_callback=self.goal_callback)
     
     self.get_logger().info("Action Server Started")
+
+  def goal_callback(self, goal_request):
+    duration = goal_request.duration
+    if duration <= 0:
+      self.get_logger().info(f"Received invalid goal: {duration}. Rejecting...")
+      return GoalResponse.REJECT
+    
+    self.get_logger().info(f"Received new goal: {duration}")
+    return GoalResponse.ACCEPT
 
   def cancel_callback(self, goal_handle):
     self.get_logger().info(f"Received cancel request: {goal_handle.request.duration}")
@@ -24,16 +33,8 @@ class NavigationNode(Node):
 
     duration = goal_handle.request.duration
       
-    # Abort condition
-    if duration <= 0:
-      self.get_logger().info("Invalid goal: Duration must be positive. Aborting...")
-      goal_handle.abort()
-          
-      result = MoveRobot.Result()
-      result.success = False
-          
-      return result
-
+    # We can Abort condition here if needed
+    
     # Execute goal
     self.get_logger().info(f"Executing Goal: {duration}")
     feedback_msg = MoveRobot.Feedback()
@@ -53,7 +54,7 @@ class NavigationNode(Node):
       feedback_msg.time_elapsed = time.time() - start_time
       goal_handle.publish_feedback(feedback_msg)
     
-      time.sleep(1)  # Sleep for 1 second
+      time.sleep(0.1)  # Sleep for 0.1 second
       
     self.get_logger().info("Goal execution completed successfully.")
     goal_handle.succeed()

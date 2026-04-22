@@ -12,7 +12,7 @@ class MoveRobotActionClient(Node):
     
   def send_goal(self):
     goal_msg = MoveRobot.Goal()
-    goal_msg.duration = 5.0 # Duration in seconds
+    goal_msg.duration = -5.0 # Duration in seconds
 
     self.get_logger().info("Sending goal...")
     self._client.wait_for_server()
@@ -33,7 +33,7 @@ class MoveRobotActionClient(Node):
     self._get_result_future.add_done_callback(self.result_callback)
     
     self._cancel_timer = self.create_timer(2.0, self.cancel_goal)
-    
+  
   def result_callback(self, future):
     result = future.result().result
     self.get_logger().info(f"Final Result: {result.success}")
